@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1740149923280,
+      "tag": "0000_bizarre_mole_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1740155439422,
+      "tag": "0001_initial_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1740163248229,
+      "tag": "0002_settings_plus_indices",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1740163674216,
+      "tag": "0003_fix_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1740268164686,
+      "tag": "0004_rename_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1740268204580,
+      "tag": "0005_seed_defaults",
+      "breakpoints": true
+    }
+  ]
+}

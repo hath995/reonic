@@ -1,0 +1,257 @@
+{
+  "id": "4d6ede52-f036-4cfd-a92c-dabd48ca0b81",
+  "prevId": "c862fce1-e1e1-4b30-b96d-41a2eeda136d",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.arrival_probabilities": {
+      "name": "arrival_probabilities",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time": {
+          "name": "time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "probability": {
+          "name": "probability",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "simulation_id_arr_index": {
+          "name": "simulation_id_arr_index",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "simulation_id_fk": {
+          "name": "simulation_id_fk",
+          "tableFrom": "arrival_probabilities",
+          "tableTo": "simulations",
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.demand_probabilities": {
+      "name": "demand_probabilities",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "demand": {
+          "name": "demand",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "probability": {
+          "name": "probability",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "simulation_id_demand_index": {
+          "name": "simulation_id_demand_index",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "simulation_id_fk": {
+          "name": "simulation_id_fk",
+          "tableFrom": "demand_probabilities",
+          "tableTo": "simulations",
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.simulation_settings": {
+      "name": "simulation_settings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "chargePoints": {
+          "name": "chargePoints",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "consumptionPer100Km": {
+          "name": "consumptionPer100Km",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "chargePointWatts": {
+          "name": "chargePointWatts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "arrivalMultiplied": {
+          "name": "arrivalMultiplied",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "simulation_id_index": {
+          "name": "simulation_id_index",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "simulation_settings_id_fk": {
+          "name": "simulation_settings_id_fk",
+          "tableFrom": "simulation_settings",
+          "tableTo": "simulations",
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.simulations": {
+      "name": "simulations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
