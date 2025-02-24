@@ -5,8 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node --import @swc-node/register/esm-register .\\server.ts",
-    "compile_runner": "npx tsc --module esnext --target ES2020 --esModuleInterop .\\runner.ts .\\src\\simulation.ts",
+    "start": "node --import @swc-node/register/esm-register server.ts",
+    "migrations": "npx drizzle-kit migrate",
+    "compile_runner_mac": "npx tsc --module esnext --target ES2020 --esModuleInterop runner.ts src/simulation.ts",
+    "compile_runner_win": "npx tsc --module esnext --target ES2020 --esModuleInterop runner.ts src\\simulation.ts",
     "test": "npx jest"
   },
   "keywords": [],

@@ -119,7 +119,7 @@ export async function runSimulation(mp: MessagePort, db: DatabaseClient, simulat
                     simulationId,
                     chargePortID: chargePoint.id!,
                     carID: chargePoint.car!.id!,
-                    ts: currDate,
+                    ts: new Date(currDate),
                     demandKw: chargePoint.car?.demand! > 0 ? chargePoint.car?.demand! : 0
                 });
                 if (chargePoint.car!.demand <= 0) {
@@ -139,7 +139,7 @@ export async function runSimulation(mp: MessagePort, db: DatabaseClient, simulat
                             simulationId,
                             chargePortID: chargePoint.id!,
                             carID: arrCar.id!,
-                            ts: currDate,
+                            ts: new Date(currDate),
                             demandKw: arrCar.demand
                         });
                     }
@@ -148,7 +148,6 @@ export async function runSimulation(mp: MessagePort, db: DatabaseClient, simulat
         }
         mp.postMessage({
             kind: "log",
-            // message: `${currDate.toISOString()}, ${chargePoints.map((row) => row.status).join(", ")}`
             message: `${currDate.toISOString()}`
         });
         currDate.setMinutes(currDate.getMinutes() + MINUTE_INCREMENT);
@@ -160,7 +159,12 @@ export async function runSimulation(mp: MessagePort, db: DatabaseClient, simulat
             kind: "log",
             message: `Inserting ${carRecords.length} car records in ${chunk_size} chunks`
         });
+        let i = 0;
         for (const chunk of chunks) {
+            mp.postMessage({
+                kind: "log",
+                message: `Inserting chunk ${i++} of ${chunks.length}`
+            });
             await db.insert(cars).values(chunk);
         }
     }
@@ -170,7 +174,12 @@ export async function runSimulation(mp: MessagePort, db: DatabaseClient, simulat
             kind: "log",
             message: `Inserting ${chargingPortRecordsData.length} charge records in ${chunk_size} chunks`
         });
+        let i = 0;
         for (const chunk of chunks) {
+            mp.postMessage({
+                kind: "log",
+                message: `Inserting chunk ${i++} of ${chunks.length}`
+            });
             await db.insert(chargingPortRecords).values(chunk);
         }
     }
