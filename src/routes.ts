@@ -173,10 +173,10 @@ function serverRouter(db: DatabaseClient) {
         const simulationId = parseInt(ctx.params.simulationId);
         const chargingEvents = await db.select({events: count(), totalDemand: sum(cars.demand)}).from(cars).where(eq(cars.simulationId, simulationId));
         const settings = await db.select().from(simulationSettings).where(eq(simulationSettings.simulationId, simulationId));
-        const highestDemand = await db.select({ts: chargingPortRecords.ts, count: count().as('count')}).from(chargingPortRecords).groupBy(chargingPortRecords.ts).orderBy(sql`count desc`).limit(10);
+        const highestDemand = await db.select({ts: chargingPortRecords.ts, count: count().as('count')}).from(chargingPortRecords).where(eq(chargingPortRecords.simulationId, simulationId)).groupBy(chargingPortRecords.ts).orderBy(sql`count desc`).limit(10);
         const peakWatts = highestDemand[0].count * settings[0].settings!.chargePointWatts;
         const concurrencyFactor = highestDemand[0].count / settings[0].settings!.chargePoints;
-        const peakDays = await db.select({date: sql`${chargingPortRecords.ts}::date`, count: count().as('count')}).from(chargingPortRecords).groupBy(sql`${chargingPortRecords.ts}::date`).orderBy(sql`count desc`).limit(10);
+        const peakDays = await db.select({date: sql`${chargingPortRecords.ts}::date`, count: count().as('count')}).from(chargingPortRecords).where(eq(chargingPortRecords.simulationId, simulationId)).groupBy(sql`${chargingPortRecords.ts}::date`).orderBy(sql`count desc`).limit(10);
         const chargerBreakdown = await db
             .select({
                 carCount: count(sql`distinct car_id`).as("carCount"),
@@ -184,6 +184,7 @@ function serverRouter(db: DatabaseClient) {
                 month: sql`EXTRACT(MONTH FROM ${chargingPortRecords.ts})`.as("month")
             })
             .from(chargingPortRecords)
+            .where(eq(chargingPortRecords.simulationId, simulationId))
             .groupBy(
                 sql`EXTRACT(YEAR FROM ${chargingPortRecords.ts})`,
                 sql`EXTRACT(MONTH FROM ${chargingPortRecords.ts})`
