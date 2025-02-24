@@ -3,6 +3,7 @@ import z from 'zod';
 export const simulationSchema = z.object({
     id: z.number().optional(),
     name: z.string(),
+    seed: z.number().optional(),
 });
 
 // export const simulationSettingKeys = z.enum(["chargePoints", "consumptionPer100Km", "chargePointWatts", "arrivalMultiplier"]);

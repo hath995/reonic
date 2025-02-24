@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node --import @swc-node/register/esm-register .\\server.ts",
-    "compile_runner": "npx tsc --module esnext --target ES2020 --esModuleInterop .\\runner.ts",
+    "compile_runner": "npx tsc --module esnext --target ES2020 --esModuleInterop .\\runner.ts .\\src\\simulation.ts",
     "test": "npx jest"
   },
   "keywords": [],
@@ -14,9 +14,9 @@
   "license": "ISC",
   "exports": {
     ".": {
-        "import": "./dist/esm/server.js",
-        "require": "./dist/cjs/server.js",
-        "default": "./dist/cjs/server.js"
+      "import": "./dist/esm/server.js",
+      "require": "./dist/cjs/server.js",
+      "default": "./dist/cjs/server.js"
     }
   },
   "dependencies": {
@@ -30,6 +30,7 @@
     "koa-logger": "^3.2.1",
     "koa-router": "^13.0.1",
     "pg": "^8.13.3",
+    "prando": "^6.0.1",
     "typescript": "^5.7.3",
     "zod": "^3.24.2"
   },
@@ -42,6 +43,7 @@
     "@types/koa-router": "^7.4.8",
     "@types/node": "^22.13.4",
     "jest": "^29.7.0",
+    "prettier": "^3.5.2",
     "ts-jest": "^29.2.5"
   }
 }

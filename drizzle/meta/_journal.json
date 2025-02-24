@@ -43,6 +43,48 @@
       "when": 1740268204580,
       "tag": "0005_seed_defaults",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1740351560719,
+      "tag": "0006_seeds",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1740358300722,
+      "tag": "0007_simulation_results",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1740359045673,
+      "tag": "0008_records",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1740391812004,
+      "tag": "0009_simulation_resume",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1740397649006,
+      "tag": "0010_relax_car_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1740397776599,
+      "tag": "0011_car_local_id",
+      "breakpoints": true
     }
   ]
 }

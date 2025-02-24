@@ -1,7 +1,7 @@
 import router from 'koa-router';
 import { DatabaseClient } from '../shared_types';
-import { eq, and } from "drizzle-orm";
-import { simulations, simulationSettings, demandProbabilities, arrivalProbabilities } from '../drizzle/schema';
+import { eq, and, sum, count, sql } from "drizzle-orm";
+import { simulations, simulationSettings, demandProbabilities, arrivalProbabilities, cars, chargingPortRecords } from '../drizzle/schema';
 import {
     simulationSchema,
     simulationSettingsSchema,
@@ -27,8 +27,9 @@ function serverRouter(db: DatabaseClient) {
     });
 
     apiRouter.post('/simulations', async (ctx) => {
-        const { name } = simulationSchema.parse(ctx.request.body);
-        const simulation = await db.insert(simulations).values({name}).returning();
+        let { name, seed } = simulationSchema.parse(ctx.request.body);
+        if(!seed) seed = Math.floor(Math.random() * Math.pow(2, 31));
+        const simulation = await db.insert(simulations).values({name, seed}).returning();
         //copy the settings and probabilities from the default simulation
         const defaultSimulationSettings = await db.select().from(simulationSettings).where(eq(simulationSettings.simulationId, Default_Simulation_ID));
         const defaultDemandProbabilities = await db.select().from(demandProbabilities).where(eq(demandProbabilities.simulationId, Default_Simulation_ID));
@@ -141,6 +142,7 @@ function serverRouter(db: DatabaseClient) {
                     switch(message.kind) {
                         case "done":
                             resolve(message.result);
+                            worker.terminate();
                             break;
                         case "error":
                             reject(message.message);
@@ -154,10 +156,47 @@ function serverRouter(db: DatabaseClient) {
                     }
                 });
         });
-        ctx.body = simulationResult;
+        try {
+            ctx.status = 200;
+            ctx.body = await simulationResult;
+        } catch (error) {
+            if(error instanceof Error) {
+                ctx.throw(error.message, 500);
+            }else if (typeof error === 'string') {
+                ctx.throw(error, 500);
+            }
+        }
 
     });
     //get simulation results
+    apiRouter.get('/simulations/:simulationId/results', async (ctx) => {
+        const simulationId = parseInt(ctx.params.simulationId);
+        const chargingEvents = await db.select({events: count(), totalDemand: sum(cars.demand)}).from(cars).where(eq(cars.simulationId, simulationId));
+        const settings = await db.select().from(simulationSettings).where(eq(simulationSettings.simulationId, simulationId));
+        const highestDemand = await db.select({ts: chargingPortRecords.ts, count: count().as('count')}).from(chargingPortRecords).groupBy(chargingPortRecords.ts).orderBy(sql`count desc`).limit(10);
+        const peakWatts = highestDemand[0].count * settings[0].settings!.chargePointWatts;
+        const concurrencyFactor = highestDemand[0].count / settings[0].settings!.chargePoints;
+        const peakDays = await db.select({date: sql`${chargingPortRecords.ts}::date`, count: count().as('count')}).from(chargingPortRecords).groupBy(sql`${chargingPortRecords.ts}::date`).orderBy(sql`count desc`).limit(10);
+        const chargerBreakdown = await db
+            .select({
+                carCount: count(sql`distinct car_id`).as("carCount"),
+                year: sql`EXTRACT(YEAR FROM ${chargingPortRecords.ts})`.as("year"),
+                month: sql`EXTRACT(MONTH FROM ${chargingPortRecords.ts})`.as("month")
+            })
+            .from(chargingPortRecords)
+            .groupBy(
+                sql`EXTRACT(YEAR FROM ${chargingPortRecords.ts})`,
+                sql`EXTRACT(MONTH FROM ${chargingPortRecords.ts})`
+            ).orderBy(sql`month, year desc`).limit(10);
+        
+        ctx.body = {
+            peakWatts,
+            concurrencyFactor,
+            chargingEvents,
+            peakDays: peakDays.map((row) => ({date: row.date, power: row.count*settings[0].settings!.chargePointWatts*(15/60)})),
+            chargerBreakdown
+        }
+    });
 
 
     return apiRouter;
