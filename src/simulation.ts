@@ -100,6 +100,8 @@ export async function runSimulation(mp: MessagePort, db: DatabaseClient, simulat
 
     let currDate = new Date(start);
     const prando = new Prando(seed);
+    let carRecords: InferInsertModel<typeof cars>[] = [];
+    let chargingPortRecordsData: InferInsertModel<typeof chargingPortRecords>[] = [];
     while (currDate < end) {
         const arrivalProbability = arrivalProbabilityMap.get(currDate.getHours());
 
@@ -110,8 +112,6 @@ export async function runSimulation(mp: MessagePort, db: DatabaseClient, simulat
             });
             return;
         }
-        let carRecords: InferInsertModel<typeof cars>[] = [];
-        let chargingPortRecordsData: InferInsertModel<typeof chargingPortRecords>[] = [];
         for (const chargePoint of chargePoints) {
             if (chargePoint.status === "used") {
                 chargePoint.car!.demand -= settings.chargePointWatts * (MINUTE_INCREMENT / HOUR);
@@ -146,14 +146,33 @@ export async function runSimulation(mp: MessagePort, db: DatabaseClient, simulat
                 }
             }
         }
-        if(carRecords.length > 0) db.insert(cars).values(carRecords).execute();
-        if(chargingPortRecordsData.length > 0 ) db.insert(chargingPortRecords).values(chargingPortRecordsData).execute();
         mp.postMessage({
             kind: "log",
             // message: `${currDate.toISOString()}, ${chargePoints.map((row) => row.status).join(", ")}`
             message: `${currDate.toISOString()}`
         });
         currDate.setMinutes(currDate.getMinutes() + MINUTE_INCREMENT);
+    }
+    const chunk_size=1000;
+    if(carRecords.length > 0) {
+        let chunks = Array.from({ length: Math.ceil(carRecords.length / chunk_size) }, (_, i) => carRecords.slice(i * chunk_size, (i + 1) * chunk_size));
+        mp.postMessage({
+            kind: "log",
+            message: `Inserting ${carRecords.length} car records in ${chunk_size} chunks`
+        });
+        for (const chunk of chunks) {
+            await db.insert(cars).values(chunk);
+        }
+    }
+    if(chargingPortRecordsData.length > 0 ) {
+        let chunks = Array.from({ length: Math.ceil(chargingPortRecordsData.length / chunk_size) }, (_, i) => chargingPortRecordsData.slice(i * chunk_size, (i + 1) * chunk_size));
+        mp.postMessage({
+            kind: "log",
+            message: `Inserting ${chargingPortRecordsData.length} charge records in ${chunk_size} chunks`
+        });
+        for (const chunk of chunks) {
+            await db.insert(chargingPortRecords).values(chunk);
+        }
     }
     // @ts-expect-error saving the updated seed for later, technically private, but we need it
     const nseed: number = prando._value;
